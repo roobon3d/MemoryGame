@@ -36,7 +36,7 @@ public class Tablero extends AppCompatActivity {
 
         fondo.animate().setStartDelay(4000).translationYBy(-800).setDuration(900).alpha(0);
 
-        tableroLayout.animate().setStartDelay(3500).translationYBy(-200).alpha(1).setDuration(1200);
+        tableroLayout.animate().setStartDelay(3500).translationYBy(-250).alpha(1).setDuration(1200);
 
         int altoPantalla = pantallaLayout.getHeight();
         int altoTablero = tableroLayout.getHeight();
