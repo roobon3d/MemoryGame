@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Animation;
@@ -15,6 +16,8 @@ import android.widget.LinearLayout;
 import java.util.Random;
 
 public class Tablero extends AppCompatActivity {
+
+    int aciertos = 0;
 
     ImageView fondo;
     Animation fondoAnim;
@@ -27,11 +30,14 @@ public class Tablero extends AppCompatActivity {
     int trasera;
     ImageView[] cartas = new ImageView[20];
 
-    ImageView[] imagenesPulsadas = new ImageView[2];
+    ImageView primeraPulsada;
+    ImageView segundaPulsada;
+    int indexAnterior;
+
+    boolean primera = true;
+    boolean esSegunda = false;
 
 
-
-   // Handler handler = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +50,9 @@ public class Tablero extends AppCompatActivity {
         cargarCartas();
         dibujarCartas();
         animacionTablero();
+        Log.d ("MIAPP", "avatares " + avatares);
 
-        imagenesPulsadas[0].setEnabled(true);
-        imagenesPulsadas[1].setEnabled(true);
+
 
 
 
@@ -196,32 +202,59 @@ public class Tablero extends AppCompatActivity {
         for (int i = 0; i < cartas.length; i++) {
 
             final int j=i;
+
             cartas[i].setEnabled(true);
             cartas[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
                     // cuando se pulsa una carta la mostramos
-                    animarCartaMostrar(cartas[j],j);
 
-                   if (imagenesPulsadas[0].isEnabled()) {
-                       imagenesPulsadas[0] = (ImageView) v;
-                       imagenesPulsadas[0].setEnabled(false);
+                   if (primera && !esSegunda) {
+                       primeraPulsada = (ImageView) v;
+                       // cuando se pulsa una carta la mostramos
+                       animarCartaMostrar(cartas[j],j);
+                       indexAnterior=j;
+                       v.setEnabled(false);
+                       esSegunda = true;
+
 
                        //TODO continuar aqui
                    } else{
-                       imagenesPulsadas[1] = (ImageView) v;
-                   }
-                   // cartas[j].setEnabled(false);
-                    // esperamos 2 segundos y la ocultamos de nuevo
-                    final Handler handler3 = new Handler();
-                    handler3.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            animarCartaOcultar(cartas[j],j);
+                      segundaPulsada = (ImageView) v;
+                       // cuando se pulsa una carta la mostramos
+                       animarCartaMostrar(cartas[j],j);
+                       v.setEnabled(false);
+                       primera = true;
 
-                        }
-                    }, 2000);
+                   }
+
+                   if (primeraPulsada==segundaPulsada){
+
+                       aciertos++;
+                       Log.d("MIAPP", "Aciertos" + aciertos);
+
+
+                   } else{
+                       if (!primera && esSegunda) {
+                           v.setEnabled(true);
+                           cartas[j].setEnabled(true);
+                           primera = true;
+                           // esperamos 2 segundos y la ocultamos de nuevo
+                           final Handler handler3 = new Handler();
+                           handler3.postDelayed(new Runnable() {
+                               @Override
+                               public void run() {
+                                   animarCartaOcultar(cartas[j], j);
+                                   animarCartaOcultar(cartas[indexAnterior], indexAnterior);
+
+                               }
+                           }, 2000);
+                       }
+                   }
+
+                   //
+
                 }
             });
         }
@@ -240,7 +273,7 @@ public class Tablero extends AppCompatActivity {
 // primer cuarto de vuelta
         v.animate().withLayer()
                 .rotationY(90)
-                .setDuration(1000)
+                .setDuration(800)
                 .withEndAction(
                         new Runnable() {
                             @Override public void run() {
@@ -252,7 +285,7 @@ public class Tablero extends AppCompatActivity {
                                 v.setRotationY(-90);
                                 v.animate().withLayer()
                                         .rotationY(0)
-                                        .setDuration(200)
+                                        .setDuration(100)
                                         .start();
                             }
                         }
@@ -269,7 +302,7 @@ public class Tablero extends AppCompatActivity {
 // primer cuarto de vuelta
         v.animate().withLayer()
                 .rotationY(-90)
-                .setDuration(500)
+                .setDuration(300)
                 .withEndAction(
                         new Runnable() {
                             @Override public void run() {
@@ -280,7 +313,7 @@ public class Tablero extends AppCompatActivity {
                                 v.setRotationY(90);
                                 v.animate().withLayer()
                                         .rotationY(0)
-                                        .setDuration(600)
+                                        .setDuration(400)
                                         .start();
                             }
                         }
