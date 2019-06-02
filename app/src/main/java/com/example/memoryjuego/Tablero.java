@@ -1,10 +1,12 @@
 package com.example.memoryjuego;
 
+import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.CardView;
 import android.util.Property;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -25,6 +27,10 @@ public class Tablero extends AppCompatActivity {
     int trasera;
     ImageView[] cartas = new ImageView[20];
 
+    ImageView[] imagenesPulsadas = new ImageView[2];
+
+
+
    // Handler handler = null;
 
     @Override
@@ -39,9 +45,15 @@ public class Tablero extends AppCompatActivity {
         dibujarCartas();
         animacionTablero();
 
+        imagenesPulsadas[0].setEnabled(true);
+        imagenesPulsadas[1].setEnabled(true);
 
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+
+
+
+
+        final Handler handler1 = new Handler();
+        handler1.postDelayed(new Runnable() {
             @Override
             public void run() {
                 voltearCartas();
@@ -49,7 +61,26 @@ public class Tablero extends AppCompatActivity {
             }
         }, 6000);
 
-       animarCarta(cartas[0]);
+      /*  final Handler handler2 = new Handler();
+        handler2.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                animarCartaMostrar(cartas[0],0);
+
+            }
+        }, 7000);*/
+
+      /*  final Handler handler3 = new Handler();
+        handler3.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                animarCartaOcultar(cartas[0],0);
+
+            }
+        }, 11000);*/
+
+      setOnClicks();
+
 
 
 
@@ -159,31 +190,106 @@ public class Tablero extends AppCompatActivity {
     }
 
 
-    public void animarCarta(ImageView carta){
+    // Asignar los onClicks a todas las cartas
+    public void setOnClicks() {
+
+        for (int i = 0; i < cartas.length; i++) {
+
+            final int j=i;
+            cartas[i].setEnabled(true);
+            cartas[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    // cuando se pulsa una carta la mostramos
+                    animarCartaMostrar(cartas[j],j);
+
+                   if (imagenesPulsadas[0].isEnabled()) {
+                       imagenesPulsadas[0] = (ImageView) v;
+                       imagenesPulsadas[0].setEnabled(false);
+
+                       //TODO continuar aqui
+                   } else{
+                       imagenesPulsadas[1] = (ImageView) v;
+                   }
+                   // cartas[j].setEnabled(false);
+                    // esperamos 2 segundos y la ocultamos de nuevo
+                    final Handler handler3 = new Handler();
+                    handler3.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            animarCartaOcultar(cartas[j],j);
+
+                        }
+                    }, 2000);
+                }
+            });
+        }
+
+    }
+
+
+
+    public void animarCartaMostrar(ImageView carta,int pos){
 
         final ImageView v = carta;
+        final int indice = pos;
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.pageflip01);
 
+        mp.start();
 // primer cuarto de vuelta
         v.animate().withLayer()
                 .rotationY(90)
-                .setDuration(8800)
+                .setDuration(1000)
                 .withEndAction(
                         new Runnable() {
                             @Override public void run() {
 
-                                cartas[0].setImageResource(avatares[0]);
+                                v.setImageResource(avatares[indice]);
+
 
                                 // segundo cuarto de vuelta
                                 v.setRotationY(-90);
                                 v.animate().withLayer()
                                         .rotationY(0)
-                                        .setDuration(8800)
+                                        .setDuration(200)
                                         .start();
                             }
                         }
                 ).start();
 
     }
+
+    public void animarCartaOcultar(ImageView carta,int pos){
+
+        final ImageView v = carta;
+        final int indice = pos;
+        final MediaPlayer mp = MediaPlayer.create(this, R.raw.pageflip03);
+
+// primer cuarto de vuelta
+        v.animate().withLayer()
+                .rotationY(-90)
+                .setDuration(500)
+                .withEndAction(
+                        new Runnable() {
+                            @Override public void run() {
+
+                                v.setImageResource(R.drawable.cartatrasera);
+
+                                // segundo cuarto de vuelta
+                                v.setRotationY(90);
+                                v.animate().withLayer()
+                                        .rotationY(0)
+                                        .setDuration(600)
+                                        .start();
+                            }
+                        }
+                ).start();
+        mp.start();
+
+
+    }
+
 
 
 
