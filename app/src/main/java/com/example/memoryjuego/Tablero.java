@@ -1,5 +1,7 @@
 package com.example.memoryjuego;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -44,6 +46,8 @@ public class Tablero extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tablero);
 
+        primeraPulsada = (ImageView) findViewById(R.id.fonditoId);
+        segundaPulsada = (ImageView) findViewById(R.id.fonditoId);
 
         cargarImagenes();
         barajear(avatares, 20);
@@ -208,63 +212,85 @@ public class Tablero extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
-                    // cuando se pulsa una carta la mostramos
-
-                   if (primera && !esSegunda) {
-                       primeraPulsada = (ImageView) v;
-                       // cuando se pulsa una carta la mostramos
-                       animarCartaMostrar(cartas[j],j);
-                       indexAnterior=j;
-                       v.setEnabled(false);
-                       esSegunda = true;
-
-
-                       //TODO continuar aqui
-                   } else{
-                      segundaPulsada = (ImageView) v;
-                       // cuando se pulsa una carta la mostramos
-                       animarCartaMostrar(cartas[j],j);
-                       v.setEnabled(false);
-                       primera = true;
-
-                   }
-
-                   if (primeraPulsada==segundaPulsada){
-
-                       aciertos++;
-                       Log.d("MIAPP", "Aciertos" + aciertos);
-
-
-                   } else{
-                       if (!primera && esSegunda) {
-                           v.setEnabled(true);
-                           cartas[j].setEnabled(true);
-                           primera = true;
-                           // esperamos 2 segundos y la ocultamos de nuevo
-                           final Handler handler3 = new Handler();
-                           handler3.postDelayed(new Runnable() {
-                               @Override
-                               public void run() {
-                                   animarCartaOcultar(cartas[j], j);
-                                   animarCartaOcultar(cartas[indexAnterior], indexAnterior);
-
-                               }
-                           }, 2000);
-                       }
-                   }
-
-                   //
-
+                    comparar((ImageView) v, j);
                 }
+
             });
         }
 
     }
 
+// ****************** COMPARAR *******************
+
+    public void comparar (final ImageView v, int i){
+
+        final int j=i;
+
+        if (primera && !esSegunda) {
+
+            // cuando se pulsa una carta la mostramos
+
+            int index = animarCartaMostrar(cartas[j],j);
+//TODO limpiar un poco esto sobran primeraPulsada, segunsPulsada, bloquear las correctas y bloquear mientras se comparan
+            primeraPulsada.setImageDrawable(getResources().getDrawable(avatares[index]));
+
+            indexAnterior=j;
+            //v.setEnabled(false);
+            esSegunda = true;
+            primera = false;
+
+        } else{
+
+            // cuando se pulsa una carta la mostramos
+            final int index = animarCartaMostrar(cartas[j],j);
+            segundaPulsada.setImageDrawable(getResources().getDrawable(avatares[index]));
+            final int imagen1 = avatares[indexAnterior];
+            final int imagen2 = avatares[index];
+
+            //segundaPulsada = (ImageView) v;
+            primera = true;
+            esSegunda = false;
+
+            final Handler handler3 = new Handler();
+            handler3.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if( imagen1 == imagen2) {
+
+                        aciertos++;
+                        Log.d("MIAPP", "Aciertos" + aciertos);
+
+                    } else{
+
+                        v.setEnabled(true);
+                        cartas[j].setEnabled(true);
+                        primera = true;
+                        // esperamos 2 segundos y la ocultamos de nuevo
+                        final Handler handler3 = new Handler();
+                        handler3.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                animarCartaOcultar(cartas[j], j);
+                                animarCartaOcultar(cartas[indexAnterior], indexAnterior);
+
+                            }
+                        }, 1000);
+
+                    }
+
+                }
+            }, 100);
 
 
-    public void animarCartaMostrar(ImageView carta,int pos){
 
+
+        }
+
+
+    }
+
+
+    public int animarCartaMostrar(ImageView carta,int pos){
         final ImageView v = carta;
         final int indice = pos;
         final MediaPlayer mp = MediaPlayer.create(this, R.raw.pageflip01);
@@ -280,8 +306,7 @@ public class Tablero extends AppCompatActivity {
 
                                 v.setImageResource(avatares[indice]);
 
-
-                                // segundo cuarto de vuelta
+                               // segundo cuarto de vuelta
                                 v.setRotationY(-90);
                                 v.animate().withLayer()
                                         .rotationY(0)
@@ -290,7 +315,7 @@ public class Tablero extends AppCompatActivity {
                             }
                         }
                 ).start();
-
+       return indice;
     }
 
     public void animarCartaOcultar(ImageView carta,int pos){
