@@ -32,8 +32,8 @@ public class Tablero extends AppCompatActivity {
     int trasera;
     ImageView[] cartas = new ImageView[20];
 
-    ImageView primeraPulsada;
-    ImageView segundaPulsada;
+   // ImageView primeraPulsada;
+   // ImageView segundaPulsada;
     int indexAnterior;
 
     boolean primera = true;
@@ -46,10 +46,11 @@ public class Tablero extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tablero);
 
-        primeraPulsada = (ImageView) findViewById(R.id.fonditoId);
-        segundaPulsada = (ImageView) findViewById(R.id.fonditoId);
+        //primeraPulsada = (ImageView) findViewById(R.id.fonditoId);
+        //segundaPulsada = (ImageView) findViewById(R.id.fonditoId);
 
         cargarImagenes();
+        barajear(avatares, 20);
         barajear(avatares, 20);
         cargarCartas();
         dibujarCartas();
@@ -182,6 +183,7 @@ public class Tablero extends AppCompatActivity {
         }
     }
 
+    // coloca un avatar en cada imageview
     public void dibujarCartas() {
 
         for (int i = 0; i < cartas.length; i++) {
@@ -190,6 +192,8 @@ public class Tablero extends AppCompatActivity {
         }
     }
 
+
+    // voltea todas las cartas sin animacion
     public void voltearCartas() {
 
         for (int i = 0; i < cartas.length; i++) {
@@ -200,7 +204,7 @@ public class Tablero extends AppCompatActivity {
     }
 
 
-    // Asignar los onClicks a todas las cartas
+    // Asignar los onClicks a todas las cartas y lanza comparar()
     public void setOnClicks() {
 
         for (int i = 0; i < cartas.length; i++) {
@@ -220,7 +224,7 @@ public class Tablero extends AppCompatActivity {
 
     }
 
-// ****************** COMPARAR *******************
+// ****************** COMPARAR LAS DOS CARTAS *******************
 
     public void comparar (final ImageView v, int i){
 
@@ -229,10 +233,10 @@ public class Tablero extends AppCompatActivity {
         if (primera && !esSegunda) {
 
             // cuando se pulsa una carta la mostramos
-
             int index = animarCartaMostrar(cartas[j],j);
+
 //TODO limpiar un poco esto sobran primeraPulsada, segunsPulsada, bloquear las correctas y bloquear mientras se comparan
-            primeraPulsada.setImageDrawable(getResources().getDrawable(avatares[index]));
+            //primeraPulsada.setImageDrawable(getResources().getDrawable(avatares[index]));
 
             indexAnterior=j;
             //v.setEnabled(false);
@@ -243,7 +247,7 @@ public class Tablero extends AppCompatActivity {
 
             // cuando se pulsa una carta la mostramos
             final int index = animarCartaMostrar(cartas[j],j);
-            segundaPulsada.setImageDrawable(getResources().getDrawable(avatares[index]));
+            //segundaPulsada.setImageDrawable(getResources().getDrawable(avatares[index]));
             final int imagen1 = avatares[indexAnterior];
             final int imagen2 = avatares[index];
 
@@ -259,6 +263,8 @@ public class Tablero extends AppCompatActivity {
 
                         aciertos++;
                         Log.d("MIAPP", "Aciertos" + aciertos);
+                        cartas[index].setEnabled(false);
+                        cartas[indexAnterior].setEnabled(false);
 
                     } else{
 
@@ -289,6 +295,7 @@ public class Tablero extends AppCompatActivity {
 
     }
 
+    //******* Animacion mostrar carta ********
 
     public int animarCartaMostrar(ImageView carta,int pos){
         final ImageView v = carta;
@@ -296,7 +303,7 @@ public class Tablero extends AppCompatActivity {
         final MediaPlayer mp = MediaPlayer.create(this, R.raw.pageflip01);
 
         mp.start();
-// primer cuarto de vuelta
+        // primer cuarto de vuelta
         v.animate().withLayer()
                 .rotationY(90)
                 .setDuration(800)
@@ -318,13 +325,15 @@ public class Tablero extends AppCompatActivity {
        return indice;
     }
 
+    //******* Animacion ocultar carta ********
+
     public void animarCartaOcultar(ImageView carta,int pos){
 
         final ImageView v = carta;
         final int indice = pos;
         final MediaPlayer mp = MediaPlayer.create(this, R.raw.pageflip03);
 
-// primer cuarto de vuelta
+        // primer cuarto de vuelta
         v.animate().withLayer()
                 .rotationY(-90)
                 .setDuration(300)
@@ -348,11 +357,7 @@ public class Tablero extends AppCompatActivity {
 
     }
 
-
-
-
-
-
+    // ******** Animacion introducción ***********
     public void animacionTablero() {
         fondo = (ImageView) findViewById(R.id.fonditoId);
         tableroLayout = findViewById(R.id.tableroId);
