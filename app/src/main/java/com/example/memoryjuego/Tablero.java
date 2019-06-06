@@ -1,6 +1,7 @@
 package com.example.memoryjuego;
 
 import android.media.MediaPlayer;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -21,7 +23,8 @@ public class Tablero extends AppCompatActivity {
     Animation fondoAnim;
     LinearLayout tableroLayout;
     LinearLayout pantallaLayout;
-
+    Chronometer cronometro;
+    LinearLayout cronoLayout;
     ImageView c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19;
 
     int avatares[];
@@ -34,6 +37,8 @@ public class Tablero extends AppCompatActivity {
     boolean esPrimera = true;
     boolean esSegunda = false;
     boolean bloquear = false;
+    boolean comienza = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,6 +184,12 @@ public class Tablero extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
 
+                    if(!comienza){
+                        // comienza el juego empieza a contar el crono
+                        comienza = true;
+                        cronometro.setBase(SystemClock.elapsedRealtime());
+                        cronometro.start();
+                    }
 
                     if (!bloquear) {
                         if (esSegunda){
@@ -348,7 +359,10 @@ public class Tablero extends AppCompatActivity {
         fondo = (ImageView) findViewById(R.id.fonditoId);
         tableroLayout = findViewById(R.id.tableroId);
         pantallaLayout = findViewById(R.id.pantallaId);
+        cronoLayout = findViewById(R.id.cronoLayoutId);
+        cronometro = findViewById(R.id.cronometro);
 
+        cronoLayout.setAlpha(0);
         fondo.setImageAlpha(0);
 
         fondoAnim = AnimationUtils.loadAnimation(this, R.anim.fondoanim);
@@ -361,7 +375,15 @@ public class Tablero extends AppCompatActivity {
 
         fondo.animate().setStartDelay(4000).translationYBy(-800).setDuration(900).alpha(0);
 
-        tableroLayout.animate().setStartDelay(3500).translationYBy(-250).alpha(1).setDuration(1200);
+        tableroLayout.animate().setStartDelay(3500).translationYBy(-250).alpha(1).setDuration(1000);
+
+        cronoLayout.animate().setStartDelay(3500).translationYBy(-250).alpha(1).setDuration(1000);
+
+        cronoLayout.setVisibility(View.VISIBLE);
+
+
+
+
     }
 
 
