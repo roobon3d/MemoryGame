@@ -1,14 +1,10 @@
 package com.example.memoryjuego;
 
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.widget.CardView;
 import android.util.Log;
-import android.util.Property;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -32,22 +28,17 @@ public class Tablero extends AppCompatActivity {
     int trasera;
     ImageView[] cartas = new ImageView[20];
 
-   // ImageView primeraPulsada;
-   // ImageView segundaPulsada;
+
     int indexAnterior;
 
-    boolean primera = true;
+    boolean esPrimera = true;
     boolean esSegunda = false;
-
-
+    boolean bloquear = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tablero);
-
-        //primeraPulsada = (ImageView) findViewById(R.id.fonditoId);
-        //segundaPulsada = (ImageView) findViewById(R.id.fonditoId);
 
         cargarImagenes();
         barajear(avatares, 20);
@@ -55,12 +46,7 @@ public class Tablero extends AppCompatActivity {
         cargarCartas();
         dibujarCartas();
         animacionTablero();
-        Log.d ("MIAPP", "avatares " + avatares);
-
-
-
-
-
+        Log.d("MIAPP", "avatares " + avatares);
 
 
         final Handler handler1 = new Handler();
@@ -68,32 +54,11 @@ public class Tablero extends AppCompatActivity {
             @Override
             public void run() {
                 voltearCartas();
-
             }
-        }, 6000);
+        }, 5000);
 
-      /*  final Handler handler2 = new Handler();
-        handler2.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                animarCartaMostrar(cartas[0],0);
-
-            }
-        }, 7000);*/
-
-      /*  final Handler handler3 = new Handler();
-        handler3.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                animarCartaOcultar(cartas[0],0);
-
-            }
-        }, 11000);*/
-
-      setOnClicks();
-
-
-
+        //Creamos los onClicks
+        setOnClicks();
 
     }
 
@@ -171,8 +136,6 @@ public class Tablero extends AppCompatActivity {
 
     //Funcion para mezclar el array de ImageViews cartas[]
     public void barajear(int cartas[], int n) {
-
-
         Random random = new Random();
 
         for (int i = 0; i < n; i++) {
@@ -204,19 +167,27 @@ public class Tablero extends AppCompatActivity {
     }
 
 
-    // Asignar los onClicks a todas las cartas y lanza comparar()
+    // Asignar los onClicks a todas las cartas y lanza comparar() en cada pulsación
     public void setOnClicks() {
 
         for (int i = 0; i < cartas.length; i++) {
 
-            final int j=i;
+            final int j = i;
 
             cartas[i].setEnabled(true);
             cartas[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    comparar((ImageView) v, j);
+
+                    if (!bloquear) {
+                        if (esSegunda){
+                            bloquear=true;
+                        }
+                        comparar((ImageView) v, j);
+
+
+                    }
                 }
 
             });
@@ -226,52 +197,56 @@ public class Tablero extends AppCompatActivity {
 
 // ****************** COMPARAR LAS DOS CARTAS *******************
 
-    public void comparar (final ImageView v, int i){
+    public void comparar(final ImageView v, int i) {
 
-        final int j=i;
+        final int j = i;
+        bloquear = true;
 
-        if (primera && !esSegunda) {
+        if (esPrimera && !esSegunda) {
+
+
 
             // cuando se pulsa una carta la mostramos
-            int index = animarCartaMostrar(cartas[j],j);
+            int index = animarCartaMostrar(cartas[j], j);
 
-//TODO limpiar un poco esto sobran primeraPulsada, segunsPulsada, bloquear las correctas y bloquear mientras se comparan
-            //primeraPulsada.setImageDrawable(getResources().getDrawable(avatares[index]));
-
-            indexAnterior=j;
-            //v.setEnabled(false);
+            indexAnterior = j;
             esSegunda = true;
-            primera = false;
+            esPrimera = false;
+            bloquear = false;
 
-        } else{
+
+        } else {
 
             // cuando se pulsa una carta la mostramos
-            final int index = animarCartaMostrar(cartas[j],j);
+            final int index = animarCartaMostrar(cartas[j], j);
             //segundaPulsada.setImageDrawable(getResources().getDrawable(avatares[index]));
             final int imagen1 = avatares[indexAnterior];
             final int imagen2 = avatares[index];
 
-            //segundaPulsada = (ImageView) v;
-            primera = true;
+            esPrimera = true;
             esSegunda = false;
+
 
             final Handler handler3 = new Handler();
             handler3.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if( imagen1 == imagen2) {
+
+
+                    if (imagen1 == imagen2) {
 
                         aciertos++;
                         Log.d("MIAPP", "Aciertos" + aciertos);
                         cartas[index].setEnabled(false);
                         cartas[indexAnterior].setEnabled(false);
+                        bloquear = false;
 
-                    } else{
+                    } else {
 
                         v.setEnabled(true);
                         cartas[j].setEnabled(true);
-                        primera = true;
-                        // esperamos 2 segundos y la ocultamos de nuevo
+                        esPrimera = true;
+                        // esperamos 1 segundos y la ocultamos de nuevo
                         final Handler handler3 = new Handler();
                         handler3.postDelayed(new Runnable() {
                             @Override
@@ -283,6 +258,7 @@ public class Tablero extends AppCompatActivity {
                         }, 1000);
 
                     }
+
 
                 }
             }, 100);
@@ -297,37 +273,45 @@ public class Tablero extends AppCompatActivity {
 
     //******* Animacion mostrar carta ********
 
-    public int animarCartaMostrar(ImageView carta,int pos){
+    public int animarCartaMostrar(ImageView carta, int pos) {
         final ImageView v = carta;
         final int indice = pos;
         final MediaPlayer mp = MediaPlayer.create(this, R.raw.pageflip01);
 
-        mp.start();
-        // primer cuarto de vuelta
-        v.animate().withLayer()
-                .rotationY(90)
-                .setDuration(800)
-                .withEndAction(
-                        new Runnable() {
-                            @Override public void run() {
+       // if (!bloquear) {
+            bloquear = true;
+            mp.start();
+            // primer cuarto de vuelta
+            v.animate().withLayer()
+                    .rotationY(90)
+                    .setDuration(800)
+                    .withEndAction(
+                            new Runnable() {
+                                @Override
+                                public void run() {
 
-                                v.setImageResource(avatares[indice]);
+                                    v.setImageResource(avatares[indice]);
 
-                               // segundo cuarto de vuelta
-                                v.setRotationY(-90);
-                                v.animate().withLayer()
-                                        .rotationY(0)
-                                        .setDuration(100)
-                                        .start();
+                                    // segundo cuarto de vuelta
+                                    v.setRotationY(-90);
+                                    v.animate().withLayer()
+                                            .rotationY(0)
+                                            .setDuration(100)
+                                            .start();
+                                }
                             }
-                        }
-                ).start();
-       return indice;
+                    ).start();
+
+
+        //
+        // }
+
+        return indice;
     }
 
     //******* Animacion ocultar carta ********
 
-    public void animarCartaOcultar(ImageView carta,int pos){
+    public void animarCartaOcultar(ImageView carta, int pos) {
 
         final ImageView v = carta;
         final int indice = pos;
@@ -339,7 +323,8 @@ public class Tablero extends AppCompatActivity {
                 .setDuration(300)
                 .withEndAction(
                         new Runnable() {
-                            @Override public void run() {
+                            @Override
+                            public void run() {
 
                                 v.setImageResource(R.drawable.cartatrasera);
 
@@ -353,6 +338,7 @@ public class Tablero extends AppCompatActivity {
                         }
                 ).start();
         mp.start();
+        bloquear=false;
 
 
     }
